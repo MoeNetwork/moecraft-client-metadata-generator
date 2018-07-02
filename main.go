@@ -103,7 +103,7 @@ func main() {
 			Path: filePath,
 			MD5:  hashFile(filePath),
 		}
-		metadata.DefaultFiles = append(metadata.SyncedFiles, file)
+		metadata.DefaultFiles = append(metadata.DefaultFiles, file)
 	}
 
 	metadata.UpdatedAt = time.Now().Unix()
