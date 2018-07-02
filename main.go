@@ -69,6 +69,10 @@ func scanDir(dirPath string) {
 		}
 		bullshit(err)
 
+		if info.Name() == ".DS_Store" {
+			return nil
+		}
+
 		file := &FileEntry{
 			Path: filePath,
 			MD5:  hashFile(filePath),
