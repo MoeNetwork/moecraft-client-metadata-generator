@@ -1,16 +1,16 @@
 # moecraft-client-metadata-generator
 
-## Example `generator.json`
+Example of `metadata_generator.json`
 
 ```json
 {
     "synced_dirs": [
         ".minecraft/versions",
-        ".minecraft/mods",
-        ".minecraft/config"
+        ".minecraft/mods"
     ],
     "synced_files": [
-        ".minecraft/servers.dat"
+        ".minecraft/servers.dat",
+        "Launcher.jar"
     ]
 }
 ```

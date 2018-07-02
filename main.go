@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"sync"
+	"fmt"
 )
 
 type FileEntry struct {
@@ -21,35 +21,18 @@ type DirEntry struct {
 	Files []*FileEntry `json:"files"`
 }
 
-var metadata struct {
+type Metadata struct {
 	SyncedDirs  []*DirEntry  `json:"synced_dirs"`
 	SyncedFiles []*FileEntry `json:"synced_files"`
 }
 
-var config struct {
+type Config struct {
 	SyncedDirs  []string `json:"synced_dirs"`
 	SyncedFiles []string `json:"synced_files"`
 }
 
-var lock sync.Mutex
-
-// Limit concurrency to 5
-var sem = make(chan bool, 5)
-
-// After the first run, I realized that md5 is fast enough, where parallel computing is not necessary
-func parallel(f func()) {
-	sem <- true
-	go func() {
-		f()
-		<-sem
-	}()
-}
-
-func wait() {
-	for i := 0; i < cap(sem); i++ {
-		sem <- true
-	}
-}
+var metadata Metadata
+var config Config
 
 func bullshit(err error) {
 	// Fuck the shitty golang error handling
@@ -61,24 +44,21 @@ func bullshit(err error) {
 func hashFile(path string) string {
 	f, err := os.Open(path)
 	bullshit(err)
-
 	defer f.Close()
 
 	hash := md5.New()
-
 	_, err = io.Copy(hash, f)
 	bullshit(err)
 
 	sum := hash.Sum(nil)[:16]
-
 	return hex.EncodeToString(sum)
 }
 
 func scanDir(dirPath string) {
-	dir := DirEntry{
+	dir := &DirEntry{
 		Path: dirPath,
 	}
-	metadata.SyncedDirs = append(metadata.SyncedDirs, &dir)
+	metadata.SyncedDirs = append(metadata.SyncedDirs, dir)
 
 	filepath.Walk(dirPath, func(filePath string, info os.FileInfo, err error) error {
 		if info.IsDir() {
@@ -86,15 +66,11 @@ func scanDir(dirPath string) {
 		}
 		bullshit(err)
 
-		parallel(func() {
-			file := FileEntry{
-				Path: filePath,
-				MD5:  hashFile(filePath),
-			}
-			lock.Lock()
-			dir.Files = append(dir.Files, &file)
-			lock.Unlock()
-		})
+		file := &FileEntry{
+			Path: filePath,
+			MD5:  hashFile(filePath),
+		}
+		dir.Files = append(dir.Files, file)
 
 		return nil
 	})
@@ -112,18 +88,13 @@ func main() {
 	}
 
 	for _, filePath := range config.SyncedFiles {
-		parallel(func() {
-			file := FileEntry{
-				Path: filePath,
-				MD5:  hashFile(filePath),
-			}
-			lock.Lock()
-			metadata.SyncedFiles = append(metadata.SyncedFiles, &file)
-			lock.Unlock()
-		})
+		file := &FileEntry{
+			Path: filePath,
+			MD5:  hashFile(filePath),
+		}
+		fmt.Println(file)
+		metadata.SyncedFiles = append(metadata.SyncedFiles, file)
 	}
-
-	wait()
 
 	data, err = json.Marshal(metadata)
 	bullshit(err)
