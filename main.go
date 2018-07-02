@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"fmt"
 )
 
 type FileEntry struct {
@@ -92,7 +91,6 @@ func main() {
 			Path: filePath,
 			MD5:  hashFile(filePath),
 		}
-		fmt.Println(file)
 		metadata.SyncedFiles = append(metadata.SyncedFiles, file)
 	}
 
