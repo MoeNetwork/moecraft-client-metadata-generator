@@ -9,8 +9,10 @@ Example of `metadata_generator.json`
         ".minecraft/mods"
     ],
     "synced_files": [
-        ".minecraft/servers.dat",
         "Launcher.jar"
+    ],
+    "default_files": [
+        ".minecraft/servers.dat"
     ]
 }
 ```

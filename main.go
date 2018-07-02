@@ -22,14 +22,16 @@ type DirEntry struct {
 }
 
 type Metadata struct {
-	UpdatedAt   int64        `json:"updated_at"`
-	SyncedDirs  []*DirEntry  `json:"synced_dirs"`
-	SyncedFiles []*FileEntry `json:"synced_files"`
+	UpdatedAt    int64        `json:"updated_at"`
+	SyncedDirs   []*DirEntry  `json:"synced_dirs"`
+	SyncedFiles  []*FileEntry `json:"synced_files"`
+	DefaultFiles []*FileEntry `json:"default_files"`
 }
 
 type Config struct {
-	SyncedDirs  []string `json:"synced_dirs"`
-	SyncedFiles []string `json:"synced_files"`
+	SyncedDirs   []string `json:"synced_dirs"`
+	SyncedFiles  []string `json:"synced_files"`
+	DefaultFiles []string `json:"default_files"`
 }
 
 var metadata Metadata
@@ -94,6 +96,14 @@ func main() {
 			MD5:  hashFile(filePath),
 		}
 		metadata.SyncedFiles = append(metadata.SyncedFiles, file)
+	}
+
+	for _, filePath := range config.DefaultFiles {
+		file := &FileEntry{
+			Path: filePath,
+			MD5:  hashFile(filePath),
+		}
+		metadata.DefaultFiles = append(metadata.SyncedFiles, file)
 	}
 
 	metadata.UpdatedAt = time.Now().Unix()
