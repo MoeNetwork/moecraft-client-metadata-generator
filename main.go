@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type FileEntry struct {
@@ -21,6 +22,7 @@ type DirEntry struct {
 }
 
 type Metadata struct {
+	UpdatedAt   int64        `json:"updated_at"`
 	SyncedDirs  []*DirEntry  `json:"synced_dirs"`
 	SyncedFiles []*FileEntry `json:"synced_files"`
 }
@@ -94,9 +96,11 @@ func main() {
 		metadata.SyncedFiles = append(metadata.SyncedFiles, file)
 	}
 
+	metadata.UpdatedAt = time.Now().Unix()
+
 	data, err = json.Marshal(metadata)
 	bullshit(err)
 
-	err = ioutil.WriteFile("metadata.json", data, 0755)
+	err = ioutil.WriteFile("metadata.json", data, 0644)
 	bullshit(err)
 }
